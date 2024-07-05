@@ -1,0 +1,28 @@
+{
+  "name": "typescript-http-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node dist/index.js",
+    "watch": "concurrently \"npx ts-node src/livereload.ts\" \"npx nodemon\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/connect-livereload": "^0.6.3",
+    "@types/livereload": "^0.9.5",
+    "@types/node": "^20.14.9",
+    "@types/serve-static": "^1.15.7",
+    "concurrently": "^8.2.2",
+    "connect": "^3.7.0",
+    "connect-livereload": "^0.6.1",
+    "livereload": "^0.9.3",
+    "nodemon": "^3.1.4",
+    "serve-static": "^1.15.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  }
+}
