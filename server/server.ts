@@ -4,16 +4,15 @@ import * as http from "http";
 import livereloadServer from "livereload";
 import path from "path";
 import serveStatic from "serve-static";
+import { Server } from "socket.io";
+import {
+  ClientToServerEvents,
+  InterServerEvents,
+  ServerToClientEvents,
+  SocketData,
+} from "./types";
 
-const liveReloadServer = livereloadServer.createServer();
-
-liveReloadServer.watch(path.join(__dirname, "../client/src"));
-
-liveReloadServer.server.once("connection", () => {
-  setTimeout(() => {
-    liveReloadServer.refresh("/");
-  }, 100);
-});
+/* =========== HTTP server =========== */
 
 const hostname = "127.0.0.1";
 const port = 3000;
@@ -32,8 +31,33 @@ app.use((req, res) => {
   }
 });
 
-const server = http.createServer(app);
+const httpServer = http.createServer(app);
 
-server.listen(port, hostname, () => {
+httpServer.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
+});
+
+/* =========== WebSocket server =========== */
+const io = new Server<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData
+>(httpServer); // Attach the websocket server to the http server
+
+io.on("connection", (socket) => {
+  socket.data.name = "Guest123";
+  io.emit("message", "User " + socket.id + " joined the chat!");
+  console.log(`A user connected ` + socket.id);
+});
+
+/* =========== Hot reloading =========== */
+const liveReloadServer = livereloadServer.createServer();
+
+liveReloadServer.watch(path.join(__dirname, "../client/src"));
+
+liveReloadServer.server.once("connection", () => {
+  setTimeout(() => {
+    liveReloadServer.refresh("/");
+  }, 100);
 });
