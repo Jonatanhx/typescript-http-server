@@ -22,15 +22,42 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const connect_1 = __importDefault(require("connect"));
+const connect_livereload_1 = __importDefault(require("connect-livereload"));
+const fs_1 = __importDefault(require("fs"));
 const http = __importStar(require("http"));
+const livereload_1 = __importDefault(require("livereload"));
+const path_1 = __importDefault(require("path"));
+const serve_static_1 = __importDefault(require("serve-static"));
+const liveReloadServer = livereload_1.default.createServer({
+    port: 35729,
+});
+liveReloadServer.watch(path_1.default.join(__dirname, "..", "client/src"));
+liveReloadServer.server.once("connection", () => {
+    setTimeout(() => {
+        liveReloadServer.refresh("/");
+    }, 100);
+});
 const hostname = "127.0.0.1";
 const port = 3000;
-const server = http.createServer((req, res) => {
-    res.statusCode = 200;
-    res.setHeader("Content-type", "text/plain");
-    res.end("Hello, World!\n");
+const app = (0, connect_1.default)();
+app.use((0, connect_livereload_1.default)());
+app.use((0, serve_static_1.default)(path_1.default.join(__dirname, "..", "client/src")));
+app.use((req, res) => {
+    if (req.url === "/") {
+        const indexPath = path_1.default.join(__dirname, "..", "client/src", "index.html");
+        fs_1.default.createReadStream(indexPath).pipe(res);
+    }
+    else {
+        res.writeHead(404);
+        res.end("Not Found");
+    }
 });
+const server = http.createServer(app);
 server.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`);
 });
